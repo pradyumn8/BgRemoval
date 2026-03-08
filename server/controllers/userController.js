@@ -77,4 +77,36 @@ const userCredits = async (req, res) => {
     }
 }
 
-export { clerkWebhooks, userCredits }
+// Plans data (must match frontend plans in assets.js)
+const plans = [
+    { id: 'Basic', price: 10, credits: 100 },
+    { id: 'Advanced', price: 50, credits: 500 },
+    { id: 'Business', price: 250, credits: 5000 },
+]
+
+// API Controller function to purchase credits (demo - no real payment)
+const purchaseCredits = async (req, res) => {
+    try {
+        const { clerkId, planId } = req.body
+
+        const plan = plans.find(p => p.id === planId)
+        if (!plan) {
+            return res.json({ success: false, message: 'Invalid plan selected' })
+        }
+
+        const userData = await userModel.findOne({ clerkId })
+        if (!userData) {
+            return res.json({ success: false, message: 'User not found' })
+        }
+
+        userData.creditBalance += plan.credits
+        await userData.save()
+
+        res.json({ success: true, credits: userData.creditBalance, message: `Successfully purchased ${plan.credits} credits!` })
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { clerkWebhooks, userCredits, purchaseCredits }
