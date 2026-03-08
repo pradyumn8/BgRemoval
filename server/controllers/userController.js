@@ -10,14 +10,14 @@ const clerkWebhooks = async (req, res) => {
         await whook.verify(JSON.stringify(req.body), {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature": req.headers["svix-timestamp"]
+            "svix-signature": req.headers["svix-signature"]
         })
         const { data, type } = req.body
         switch (type) {
             case "user.created": {
                 const userData = {
                     clerkId: data.id,
-                    email: data.email_addersses[0].email_address,
+                    email: data.email_addresses[0].email_address,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
@@ -28,7 +28,7 @@ const clerkWebhooks = async (req, res) => {
             }
             case "user.updated": {
                 const userData = {
-                    email: data.email_addersses[0].email_address,
+                    email: data.email_addresses[0].email_address,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
@@ -40,7 +40,7 @@ const clerkWebhooks = async (req, res) => {
             }
             case "user.deleted": {
                 await userModel.findOneAndDelete({ clerkId: data.id })
-                req.json({})
+                res.json({})
                 break;
             }
             default:
@@ -52,4 +52,29 @@ const clerkWebhooks = async (req, res) => {
 
     }
 }
-export { clerkWebhooks }
+
+
+// API Controller function to get user available credits data
+const userCredits = async (req, res) => {
+    try {
+        const { clerkId } = req.body
+        let userData = await userModel.findOne({ clerkId })
+
+        // Auto-create user if not found (webhook may not have fired)
+        if (!userData) {
+            userData = await userModel.create({
+                clerkId,
+                email: `${clerkId}@placeholder.com`,
+                photo: 'https://via.placeholder.com/150',
+                creditBalance: 5
+            })
+        }
+
+        res.json({ success: true, credits: userData.creditBalance })
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { clerkWebhooks, userCredits }

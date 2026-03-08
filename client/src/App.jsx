@@ -11,14 +11,14 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <div className='min-h-screen bg-slate-50'>
-      <ToastContainer position='bottom-right'/>
-      <Navbar/>
+      <ToastContainer position='bottom-right' />
+      <Navbar />
       <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/result' element={<Result/>}/>
-        <Route path='/buy' element={<BuyCredit/>}/>
+        <Route path='/' element={<Home />} />
+        <Route path='/result' element={<Result />} />
+        <Route path='/buy' element={<BuyCredit />} />
       </Routes>
-      <Footer/>
+      <Footer />
     </div>
   )
 }
